@@ -1,0 +1,24 @@
+
+
+
+
+
+spring:
+  datasource:
+    username: root
+    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/onesaas-tenant-master
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    generate-ddl: true
+
+
+jwt:
+  secret: aabbccdd
+  expiration: 36000
+logging:
+  level:
+    org.springframework: info

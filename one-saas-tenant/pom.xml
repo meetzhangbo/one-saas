@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>one-saas</artifactId>
+        <groupId>com.zhangbo</groupId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>one-saas-tenant</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>one-saas-tenant-api</module>
+        <module>one-saas-tenant-web</module>
+    </modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.zhangbo</groupId>
+            <artifactId>one-saas-common</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
+</project>

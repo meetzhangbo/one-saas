@@ -6,18 +6,16 @@ import com.zhangbo.onesaas.tenant.api.multidatasource.TenantIdentifierResolverIm
 import org.hibernate.MultiTenancyStrategy;
 import org.hibernate.cfg.Environment;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import javax.persistence.EntityManagerFactory;
 import java.util.Properties;
 
 /**
@@ -28,8 +26,8 @@ import java.util.Properties;
 @Configuration
 @EnableJpaRepositories(
         basePackages = {"com.zhangbo.onesaas.tenant.api.repository.tenant"},
-        transactionManagerRef = BeanIds.TENANT_TRANSACTION_MANAGER,
-        entityManagerFactoryRef = BeanIds.TENANT_ENTITY_MANAGER_FACTORY_NAME
+        transactionManagerRef = "tenantTransactionManager",
+        entityManagerFactoryRef = "tenantEntityManagerFactory"
 )
 public class MultiDatasourceConfig {
 
@@ -44,40 +42,34 @@ public class MultiDatasourceConfig {
      *
      * @return
      */
-    @Bean(name = BeanIds.TENANT_ENTITY_MANAGER_FACTORY_NAME)
-    public LocalContainerEntityManagerFactoryBean entityManagerFactory(JpaVendorAdapter jpaVendorAdapter) {
-        LocalContainerEntityManagerFactoryBean factory = new LocalContainerEntityManagerFactoryBean();
-        factory.setJpaVendorAdapter(jpaVendorAdapter);
-        factory.setPersistenceUnitName("one-saas-tenant-unit");
-        factory.setPackagesToScan("com.zhangbo.onesaas.tenant.api.entity.tenant");
+    @Bean
+    LocalContainerEntityManagerFactoryBean tenantEntityManagerFactory() {
+
+        HibernateJpaVendorAdapter jpaVendorAdapter = new HibernateJpaVendorAdapter();
+        jpaVendorAdapter.setGenerateDdl(true);
+        jpaVendorAdapter.setShowSql(true);
 
         Properties properties = new Properties();
-        properties.put(Environment.DIALECT, "org.hibernate.dialect.MySQLDialect");
+        properties.put(Environment.DIALECT, "org.hibernate.dialect.MySQL8Dialect");
         properties.put(Environment.SHOW_SQL, true);
         properties.put(Environment.HBM2DDL_AUTO, "update");
         properties.put(Environment.FORMAT_SQL, true);
         properties.put(Environment.MULTI_TENANT, MultiTenancyStrategy.SCHEMA);
         properties.put(Environment.MULTI_TENANT_CONNECTION_PROVIDER, multiTenantConnectionProvider);
         properties.put(Environment.MULTI_TENANT_IDENTIFIER_RESOLVER, multiIdentifierResolver);
-        properties.put(Environment.PHYSICAL_NAMING_STRATEGY, "org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl");
+        properties.put(Environment.PHYSICAL_NAMING_STRATEGY, SpringPhysicalNamingStrategy.class.getName());
 
+
+        LocalContainerEntityManagerFactoryBean factory = new LocalContainerEntityManagerFactoryBean();
+        factory.setJpaVendorAdapter(jpaVendorAdapter);
+        factory.setPackagesToScan("com.zhangbo.onesaas.tenant.api.entity.tenant");
         factory.setJpaProperties(properties);
         return factory;
     }
 
-
-    /**
-     * 多数据源事务管理器
-     *
-     * @param managerFactory
-     * @return
-     */
-    @Bean(name = BeanIds.TENANT_TRANSACTION_MANAGER)
-    public PlatformTransactionManager transactionManager(
-            @Qualifier(BeanIds.TENANT_ENTITY_MANAGER_FACTORY_NAME) EntityManagerFactory managerFactory) {
-        JpaTransactionManager jpaTransactionManager = new JpaTransactionManager();
-        jpaTransactionManager.setEntityManagerFactory(managerFactory);
-        return jpaTransactionManager;
+    @Bean
+    public PlatformTransactionManager tenantTransactionManager() {
+        return new JpaTransactionManager(tenantEntityManagerFactory().getObject());
     }
 
 }

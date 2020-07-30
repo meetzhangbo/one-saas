@@ -2,6 +2,7 @@ package com.zhangbo.onesaas.tenant.api.security;
 
 import com.zhangbo.onesaas.common.utils.JwtUtil;
 import com.zhangbo.onesaas.tenant.api.contant.SecurityConstant;
+import com.zhangbo.onesaas.tenant.api.multidatasource.TenantHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,6 +29,8 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
+        String t = request.getHeader("t");
+        TenantHolder.set(Long.valueOf(t));
         String token = request.getHeader(SecurityConstant.JWT_HEADER);
         if (token != null && token.startsWith(SecurityConstant.JWT_BEARER)) {
             token = token.substring(token.indexOf(SecurityConstant.JWT_BEARER));

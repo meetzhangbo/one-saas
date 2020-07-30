@@ -29,7 +29,7 @@ public class DataSourceBasedMultiTenantConnectionProviderImpl extends AbstractDa
         if (dataSourceMap.isEmpty()) {
             List<TenantDatasource> datasourceList = tenantDatasourceRepository.findAll();
             datasourceList.forEach(x -> {
-                dataSourceMap.put(String.valueOf(x.getTenantId()), dataSource(x));
+                dataSourceMap.put(String.valueOf(x.getTenantDatasourceId()), dataSource(x));
             });
         }
         return dataSourceMap.values().iterator().next();
